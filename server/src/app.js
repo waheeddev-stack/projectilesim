@@ -11,6 +11,8 @@ export function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
+  // Behind Render's / Vercel's proxies: use the real client IP (rate limiting) and https detection.
+  app.set('trust proxy', 1);
   app.use(helmet());
   app.use(
     cors({

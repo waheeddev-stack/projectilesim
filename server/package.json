@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/index.js",
-    "start": "node --env-file=.env src/index.js",
+    "dev": "node --watch --env-file-if-exists=.env src/index.js",
+    "start": "node --env-file-if-exists=.env src/index.js",
     "test": "vitest run",
     "postinstall": "prisma generate",
     "db:create": "node --env-file=.env scripts/create-db.js",

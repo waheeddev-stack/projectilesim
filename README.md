@@ -126,3 +126,15 @@ blue `#0080FF`, alert red `#FF0000`, ok green `#00FF00` on `#0A0F1C`. Palette co
 blue) use lighter text variants (`--text-alert`, `--text-blue`) while the pure colours stay for lines and glows.
 Decorative motion (ticker, scan line, blinking dots, line drawing) stops under `prefers-reduced-motion`. The font
 stack prefers JetBrains Mono if installed, and falls back to system monospace (no web font is downloaded).
+
+## Deployment (Vercel + Render + TiDB)
+
+**API on Render** - `render.yaml` is a Blueprint (New > Blueprint, pick this repo). It creates the web service
+`projectilesim-api`; set `DATABASE_URL` (the TiDB `mysql://...?sslaccept=strict` URL) in the dashboard. `JWT_SECRET` is
+generated for you. Check `https://projectilesim-api.onrender.com/api/health`. The free plan sleeps when idle, so the
+first request after a pause is slow. If you name the service differently, change the URL in `client/vercel.json`.
+
+**Client on Vercel** - import the repo with *Root Directory* `client` (Vite is auto-detected). `client/vercel.json`
+rewrites `/api/*` to the Render API, so the browser only talks to one origin and the SameSite login cookie works.
+Then add the domain (e.g. `projectilesim.linkpc.net`) in the Vercel project and create the DNS records it shows.
+Set `CLIENT_ORIGIN` on Render to that domain.

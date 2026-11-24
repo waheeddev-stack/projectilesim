@@ -1,0 +1,21 @@
+# Render Blueprint for the Express API (the React client is hosted on Vercel).
+# The whole repo is deployed because the server imports the shared physics engine from client/src/physics.
+services:
+  - type: web
+    name: projectilesim-api
+    runtime: node
+    plan: free
+    buildCommand: npm install --prefix server
+    startCommand: npm run start --prefix server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_ORIGIN
+        value: https://projectilesim.linkpc.net
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # paste the TiDB mysql:// URL in the Render dashboard
