@@ -1,0 +1,25 @@
+{
+  "name": "projectile-motion-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive projectile motion simulator - Shree L. R. Tiwari College of Engineering mini project",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently -n server,client -c blue,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "npm run start --prefix server",
+    "test": "npm run test --prefix client && npm run test --prefix server",
+    "lint": "eslint client/src server/src --ext .js,.jsx",
+    "format": "prettier --write .",
+    "db:create": "npm run db:create --prefix server",
+    "db:migrate": "npm run db:migrate --prefix server",
+    "db:seed": "npm run db:seed --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.4.2"
+  }
+}

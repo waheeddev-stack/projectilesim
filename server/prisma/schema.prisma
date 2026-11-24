@@ -1,0 +1,61 @@
+// Prisma schema for the Projectile Motion Simulator.
+//
+// Provider is "mysql" because TiDB speaks the MySQL protocol. To use another
+// database change `provider` ("sqlite" for local dev, "postgresql") and
+// DATABASE_URL in .env - the models themselves are portable (no enums,
+// no database-specific types).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  name         String       @db.VarChar(100)
+  email        String       @unique @db.VarChar(191)
+  passwordHash String       @db.VarChar(100)
+  createdAt    DateTime     @default(now())
+  experiments  Experiment[]
+}
+
+model Experiment {
+  id                   Int            @id @default(autoincrement())
+  userId               Int
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode                 String         @db.VarChar(16) // "free" | "target"
+  angle                Float
+  velocity             Float
+  initialHeight        Float          @default(0)
+  gravity              Float          @default(9.81)
+  airResistanceEnabled Boolean        @default(false)
+  mass                 Float          @default(0.145)
+  dragCoeff            Float          @default(0.47)
+  area                 Float          @default(0.0043)
+  airDensity           Float          @default(1.225)
+  maxHeight            Float
+  range                Float
+  timeOfFlight         Float
+  note                 String?        @db.VarChar(500)
+  createdAt            DateTime       @default(now())
+  targetAttempt        TargetAttempt?
+
+  @@index([userId, createdAt])
+}
+
+model TargetAttempt {
+  id           Int        @id @default(autoincrement())
+  experimentId Int        @unique
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  targetX      Float
+  targetY      Float
+  targetSize   Float
+  hit          Boolean
+  missDistance Float
+  score        Int
+  difficulty   String     @db.VarChar(16)
+}
