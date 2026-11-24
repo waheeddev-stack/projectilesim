@@ -23,8 +23,6 @@ export function computeBounds({ runs, preview, target }) {
   runs.forEach((r) => {
     take(r.result.points);
     if (r.ideal) take(r.ideal.points);
-    // The plane flies on at constant speed, so keep it in view for the whole flight.
-    if (r.params.object === 'plane') xMax = Math.max(xMax, r.result.points[0].vx * r.result.timeOfFlight + 45);
   });
   if (preview) take(preview.points);
   if (target) {
@@ -32,6 +30,43 @@ export function computeBounds({ runs, preview, target }) {
     yMax = Math.max(yMax, target.y + target.size * 1.5);
   }
   return { xMax: xMax * 1.08, yMax: yMax * 1.15 };
+}
+
+/** Line-art aircraft centred on (x, y). `angle` is the canvas rotation (nose direction, radians). */
+function drawPlane(ctx, x, y, angle, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.strokeStyle = color;
+  ctx.fillStyle = COLORS.bg;
+  ctx.lineWidth = 1.6;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.moveTo(22, 0); // nose
+  ctx.quadraticCurveTo(14, -5, 2, -5); // top of fuselage
+  ctx.lineTo(-18, -4);
+  ctx.lineTo(-24, -14); // tail fin
+  ctx.lineTo(-18, -14);
+  ctx.lineTo(-12, -4);
+  ctx.lineTo(-22, 0); // tail end
+  ctx.lineTo(-12, 4);
+  ctx.lineTo(2, 5); // belly
+  ctx.quadraticCurveTo(14, 5, 22, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath(); // wings
+  ctx.moveTo(4, 1);
+  ctx.lineTo(-8, 15);
+  ctx.lineTo(-13, 15);
+  ctx.lineTo(-8, 1);
+  ctx.moveTo(4, -1);
+  ctx.lineTo(-8, -9);
+  ctx.lineTo(-13, -9);
+  ctx.lineTo(-8, -1);
+  ctx.stroke();
+  ctx.restore();
 }
 
 export function drawScene(ctx, width, height, scene) {
@@ -177,32 +212,8 @@ export function drawScene(ctx, width, height, scene) {
   ctx.strokeStyle = COLORS.cyan;
   ctx.lineWidth = 3;
   if (scene.object === 'plane') {
-    // Line-art aircraft flying right; its belly sits on the release point.
-    // It keeps flying level at the release speed while the object falls.
-    const flying = runs.find((r) => r.id === activeId && r.params.object === 'plane');
-    const shift = flying ? flying.result.points[0].vx * Math.min(t, flying.result.timeOfFlight) * scale : 0;
-    ctx.save();
-    ctx.translate(shift, 0);
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = COLORS.cyan;
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    ctx.moveTo(ox - 34, oy - 10); // tail
-    ctx.lineTo(ox - 40, oy - 24); // fin
-    ctx.lineTo(ox - 30, oy - 24);
-    ctx.lineTo(ox - 18, oy - 12);
-    ctx.lineTo(ox + 18, oy - 12); // top of fuselage
-    ctx.quadraticCurveTo(ox + 36, oy - 10, ox + 38, oy - 5); // nose
-    ctx.quadraticCurveTo(ox + 30, oy, ox + 14, oy); // belly
-    ctx.lineTo(ox - 28, oy);
-    ctx.closePath();
-    ctx.moveTo(ox - 4, oy - 6); // wing
-    ctx.lineTo(ox - 16, oy + 8);
-    ctx.lineTo(ox - 6, oy + 8);
-    ctx.lineTo(ox + 12, oy - 6);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.restore();
+    // Before launch the plane waits at the launch point, nose along the launch angle.
+    if (!runs.some((r) => r.id === activeId)) drawPlane(ctx, ox, oy, -rad, COLORS.cyan);
   } else {
     ctx.beginPath();
     ctx.moveTo(ox, oy);
@@ -226,7 +237,10 @@ export function drawScene(ctx, width, height, scene) {
   const active = runs.find((r) => r.id === activeId);
   if (active) {
     const p = pointAtTime(active.result.points, t);
-    if (p) {
+    if (p && active.params.object === 'plane') {
+      // The plane itself is the projectile: nose follows the velocity vector.
+      drawPlane(ctx, sx(p.x), sy(p.y), Math.atan2(-p.vy, p.vx), active.color);
+    } else if (p) {
       ctx.fillStyle = '#fff';
       ctx.shadowColor = active.color;
       ctx.shadowBlur = 16;

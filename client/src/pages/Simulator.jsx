@@ -80,7 +80,7 @@ export default function Simulator() {
         if (!alive) return;
         setParams({
           ...DEFAULTS,
-          object: e.mass >= 100 && e.angle === 0 ? 'plane' : 'ball',
+          object: e.mass >= 1000 ? 'plane' : 'ball',
           angle: e.angle,
           velocity: e.velocity,
           initialHeight: e.initialHeight,

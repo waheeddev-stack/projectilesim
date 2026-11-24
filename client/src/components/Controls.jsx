@@ -37,7 +37,7 @@ export default function Controls({ params, onChange, lockDrag, compare }) {
           ))}
         </select>
         {params.object === 'plane' && (
-          <span className="field__unit">Released from a plane flying level: angle 0, velocity = plane speed.</span>
+          <span className="field__unit">The plane itself flies the projectile arc (5 tonnes, unpowered).</span>
         )}
       </div>
 
@@ -94,7 +94,7 @@ export default function Controls({ params, onChange, lockDrag, compare }) {
         </div>
         <Field label="Gravity" unit="m/s²" value={params.gravity} min={LIMITS.gravity.min} max={LIMITS.gravity.max} step={0.01} onChange={set('gravity')} />
         <Field label="Initial height" unit="m" value={params.initialHeight} min={0} max={1000} step={1} onChange={set('initialHeight')} />
-        <Field label="Mass" unit="kg" value={params.mass} min={LIMITS.mass.min} max={1000} step={0.5} onChange={set('mass')} />
+        <Field label="Mass" unit="kg" value={params.mass} min={LIMITS.mass.min} max={20000} step={0.5} onChange={set('mass')} />
         <Field
           label="Drag coefficient Cd"
           value={params.dragCoeff}

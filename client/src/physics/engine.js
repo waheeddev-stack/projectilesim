@@ -29,7 +29,7 @@ export const LIMITS = {
   angle: { min: 0, max: 90 },
   initialHeight: { min: 0, max: 1000 },
   gravity: { min: 0.1, max: 30 },
-  mass: { min: 0.01, max: 1000 },
+  mass: { min: 0.01, max: 20000 },
   dragCoeff: { min: 0, max: 5 },
   area: { min: 0.0001, max: 10 },
   airDensity: { min: 0, max: 20 },
