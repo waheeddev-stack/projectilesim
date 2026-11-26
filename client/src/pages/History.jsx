@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { EmptyState, ErrorState, LoadingState } from '../components/States.jsx';
 import { api } from '../lib/api.js';
+import { experimentSheets, exportFileName } from '../lib/exportReadings.js';
+import { downloadWorkbook } from '../lib/xlsx.js';
 import { usePageTitle } from '../lib/usePageTitle.js';
 
 const PAGE_SIZE = 8;
@@ -70,6 +72,29 @@ export default function History() {
 
   const update = (patch) => setFilters((f) => ({ ...f, page: 1, ...patch }));
 
+  const [exporting, setExporting] = useState({ busy: false, error: '' });
+
+  /** Downloads every saved experiment (all pages, ignoring the filters) as .xlsx. */
+  async function exportAll() {
+    setExporting({ busy: true, error: '' });
+    try {
+      const all = [];
+      let page = 1;
+      let totalPages = 1;
+      do {
+        const res = await api.listExperiments({ page, pageSize: 50, sort: 'createdAt', order: 'asc' });
+        all.push(...res.data);
+        totalPages = res.totalPages;
+        page += 1;
+      } while (page <= totalPages);
+      if (!all.length) throw new Error('There are no saved experiments to export yet.');
+      downloadWorkbook(exportFileName('projectile-history'), experimentSheets(all));
+      setExporting({ busy: false, error: '' });
+    } catch (err) {
+      setExporting({ busy: false, error: err.message });
+    }
+  }
+
   async function remove(id) {
     setDeleteError('');
     try {
@@ -85,7 +110,21 @@ export default function History() {
 
   return (
     <div className="stack">
-      <h1>History</h1>
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <h1 style={{ margin: 0 }}>History</h1>
+        <button
+          className="button button--primary"
+          onClick={exportAll}
+          disabled={exporting.busy || state.data?.total === 0}
+        >
+          {exporting.busy ? 'Exporting...' : 'Export all to Excel'}
+        </button>
+      </div>
+      {exporting.error && (
+        <p className="field__error" role="alert">
+          {exporting.error}
+        </p>
+      )}
       <StatsStrip stats={stats} />
 
       <section className="panel panel--compact" aria-label="Filters">

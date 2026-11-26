@@ -77,6 +77,15 @@ For PostgreSQL change the provider and URL (and drop the `@db.VarChar` attribute
 API tests use a separate database named `<TIDB_DATABASE>_test` (created automatically) and delete the users they
 create.
 
+## Excel export
+
+- **Simulator > Export to Excel**: a `Summary` sheet (parameters and results) plus every reading
+  (t, x, y, vx, vy, speed) of each run on the canvas. No login needed.
+- **History > Export all to Excel**: every saved experiment and target result of the logged-in user, ignoring the
+  page filters.
+
+Files are generated in the browser by `client/src/lib/xlsx.js` (no extra dependency).
+
 ## API reference
 
 All responses are JSON. Errors always look like `{ "error": { "code": "...", "message": "..." } }`.

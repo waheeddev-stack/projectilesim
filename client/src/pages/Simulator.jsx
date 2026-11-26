@@ -9,6 +9,8 @@ import SimCanvas from '../components/SimCanvas.jsx';
 import TargetPanel from '../components/TargetPanel.jsx';
 import { api } from '../lib/api.js';
 import { useAuth } from '../lib/AuthContext.jsx';
+import { exportFileName, runSheets } from '../lib/exportReadings.js';
+import { downloadWorkbook } from '../lib/xlsx.js';
 import { MAX_RUNS, RUN_COLORS } from '../lib/palette.js';
 import { usePageTitle } from '../lib/usePageTitle.js';
 import { usePlayback } from '../lib/usePlayback.js';
@@ -325,6 +327,14 @@ export default function Simulator() {
               </button>
               <button className="button" onClick={clearTrails} disabled={!runs.length}>
                 Clear trails
+              </button>
+              <button
+                className="button"
+                onClick={() => downloadWorkbook(exportFileName('projectile-readings'), runSheets(runs))}
+                disabled={!runs.length}
+                title="Download the results and every reading of the runs on screen"
+              >
+                Export to Excel
               </button>
               {!inTarget && (
                 <button
